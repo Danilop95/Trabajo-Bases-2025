@@ -48,38 +48,33 @@ Los campamentos son esenciales para la producción de recursos. Existen tres tip
 
 El progreso del jugador, incluyendo el número de casas, aldeanos y niveles de los campamentos, será almacenado en una base de datos. Sin embargo, la estructura específica de la base de datos y la lógica para la actualización de edificios y contratación de aldeanos aún deben definirse mediante un análisis detallado.
 
-## Preguntas Pertinentes para el Desarrollo
 
-### Estructura de la Base de Datos
-- ¿Cómo se diseñarán las tablas para representar a los jugadores, edificios y recursos?
-- ¿Se incluirá un registro de tiempo para calcular la producción de recursos en función del tiempo transcurrido?
+A continuación encontrarás un **script completo** en **MySQL** que:
 
-### Lógica de Juego
-- ¿Cómo se manejará la lógica de producción en tiempo real?
-- ¿Cómo se determinarán los costos de actualización de los edificios de manera dinámica según su nivel?
+1. Elimina (si existen) las tablas que se vayan a crear.  
+2. Crea todas las tablas necesarias (con tipos de dato equivalentes en MySQL).  
+3. Inserta datos de ejemplo (igual que en el código original).  
+4. Implementa un **procedimiento almacenado** para subir el nivel de un campamento de madera, descontando madera y ladrillo.  
 
-### Interfaz de Usuario
-- ¿Qué tipo de interfaz se utilizará para que los jugadores gestionen edificios y asignen aldeanos? (Web, móvil, consola).
-- ¿Habrá un tablero que muestre los recursos en tiempo real?
-
-### Actualización y Producción
-- ¿La producción de recursos será constante (por segundo) o solo al realizar acciones específicas?
-- ¿Cómo se manejará la lógica de asignación de aldeanos a campamentos para reflejar su impacto en la producción?
-
-### Restricciones y Balance
-- ¿Cómo se garantizará que los costos y beneficios de los edificios estén equilibrados?
-- ¿Qué límites se impondrán para evitar un crecimiento descontrolado?
-
-### Escalabilidad
-- ¿El juego será para un solo jugador o existirá la posibilidad de interacción entre múltiples jugadores?
-- ¿Cómo se manejará la carga de la base de datos en caso de que haya un gran número de jugadores?
-
-Este documento proporciona una base estructurada para el desarrollo del sistema de base de datos y la lógica del juego. Se recomienda realizar un análisis detallado antes de proceder con la implementación.
+> **Nota**:  
+> - En MySQL no existe `DBMS_OUTPUT.PUT_LINE`; se suele usar `SELECT 'texto';` o `SIGNAL`/`SET` para notificaciones, o simplemente no mostrar nada. He dejado algunos `SELECT` como mensajes de salida, a modo de ejemplo.  
+> - Se cambian los tipos `NUMBER` y `VARCHAR2` propios de Oracle por tipos equivalentes en MySQL (`INT`, `VARCHAR`).  
+> - La sintaxis `SELECT campo INTO variable` dentro de un procedimiento requiere `DELIMITER` y `DECLARE` en MySQL.
 
 ---
 
-**Contacto:** [Añadir información de contacto o repositorio GitHub]
+### Cómo usar el procedimiento
+Una vez ejecutado el script anterior en tu instancia de MySQL, para subir el nivel del campamento de madera (en la partida con `Id_Partida=1`, por ejemplo), basta con llamar:
 
-https://prod.liveshare.vsengsaas.visualstudio.com/join?FA92C0B68EE47F7B9E32D15A172776159813
+```sql
+CALL subir_nivel_campamento_madera(1);
+```
 
-https://prod.liveshare.vsengsaas.visualstudio.com/join?FA92C0B68EE47F7B9E32D15A172776159813
+El procedimiento:
+- Obtiene el nivel actual del campamento de tipo `'Madera'`.
+- Consulta en la tabla `DATOS_CAMPAMENTOS` los costes de mejora para ese nivel.
+- Verifica si la `PARTIDA` tiene suficiente `Madera` y `Ladrillo`.
+- Si es suficiente, sube el nivel (`UPDATE CAMPAMENTOS`) y descuenta los recursos (`UPDATE PARTIDA`).
+- Muestra un mensaje final con la cantidad de recursos restante o un aviso de que no hay recursos suficientes.
+
+¡Con esto tienes un ejemplo completo y funcional para **MySQL**!
