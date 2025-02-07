@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    # Variables de entorno para MySQL
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-mi_basedatos}
+      - MYSQL_USER=${MYSQL_USER:-usuario}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+    ports:
+      - "3306:3306"        # Exponemos el puerto de MySQL
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    depends_on:
+      - db
+    # Variables de entorno para phpMyAdmin
+    environment:
+      - PMA_HOST=${PMA_HOST:-db}        # Nombre del servicio de MySQL
+      - PMA_PORT=${PMA_PORT:-3306}
+      - PMA_USER=${MYSQL_USER:-usuario} # Coinciden con el usuario creado en MySQL
+      - PMA_PASSWORD=${MYSQL_PASSWORD:-password}
+      # Opcional: Controlar el valor de upload/import
+      - UPLOAD_LIMIT=300M
+    ports:
+      - "8080:80"          # Abrimos phpMyAdmin en el puerto 8080
+    restart: unless-stopped
+
+volumes:
+  db_data:
