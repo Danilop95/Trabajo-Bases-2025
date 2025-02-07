@@ -61,7 +61,7 @@ CREATE TABLE CASAS (
     FOREIGN KEY (Id_Partida) REFERENCES PARTIDA (Id_Partida)
 );
 
--- Tabla CAMPAMENTOS (tipos: Madera, Piedra, Oro; nivel, trabajadores, etc.)
+-- Tabla CAMPAMENTOS (tipos: Madera, Ladrillo, Oro; nivel, trabajadores, etc.)
 CREATE TABLE CAMPAMENTOS (
   Id_Campamentos  INT PRIMARY KEY,
   Tipo            VARCHAR(50) NOT NULL,
@@ -91,34 +91,37 @@ CREATE TABLE ALDEANOS (
 -- 3) INSERCIÓN DE DATOS DE EJEMPLO
 -- --------------------------------------------------------------
 
--- 3.1. Usuario "fonsi" (ID=1) con contraseña "lll"
+-- 3.1. Usuario "AlvDan" (ID=1) con contraseña "lll"
 INSERT INTO USUARIO (Id_Usuario, Nombre, Contraseña)
-VALUES (1, 'fonsi', 'lll');
+VALUES (1, 'AlvDan', 'lll');
 
--- 3.2. Partida (ID=1) con recursos 0 y 1 casa, vinculada al usuario 1
+-- 3.2. Partida (ID=1) con recursos iniciales
+--     Corrección: 500 Madera, 500 Ladrillo, 300 Oro
 INSERT INTO PARTIDA (Id_Partida, Madera, Ladrillo, Oro, Numero_Casas, Id_Usuario)
-VALUES (1, 0, 0, 0, 1, 1);
+VALUES (1, 500, 500, 300, 1, 1);
 
--- 3.3. Datos de campamentos (ejemplo, niveles 1 a 5 para Madera, Piedra, Oro)
+-- 3.3. Datos de campamentos (ejemplo, niveles 1 a 5 para Madera, Ladrillo, Oro)
+--     Corrección: "Piedra" -> "Ladrillo" para coherencia con la descripción del juego
+
 INSERT INTO DATOS_CAMPAMENTOS
   (Id_Datos_Campamentos, Nivel, Tipo, Coste_Madera_Mejora,
    Coste_Ladrillo_Mejora, Coste_Oro_Mejora, Numero_Trabajadores_Al_100, Produccion)
 VALUES
-  (1, 1, 'Madera', 100,  0,   0, 10, 50),
-  (2, 1, 'Piedra', 100,  0,   0, 10, 50),
-  (3, 1, 'Oro',    100,  0,   0, 10, 50),
-  (4, 2, 'Madera', 200,  0,   0, 20, 100),
-  (5, 2, 'Piedra', 200,  0,   0, 20, 100),
-  (6, 2, 'Oro',    200,  0,   0, 20, 100),
-  (7, 3, 'Madera', 400,  0,   0, 40, 200),
-  (8, 3, 'Piedra', 400,  0,   0, 40, 200),
-  (9, 3, 'Oro',    400,  0,   0, 40, 200),
-  (10,4, 'Madera', 500,  0,   0, 50, 250),
-  (11,4, 'Piedra', 500,  0,   0, 50, 250),
-  (12,4, 'Oro',    500,  0,   0, 50, 250),
-  (13,5, 'Madera', 600,  0,   0, 70, 270),
-  (14,5, 'Piedra', 600,  0,   0, 70, 270),
-  (15,5, 'Oro',    600,  0,   0, 70, 270);
+  (1, 1, 'Madera',   100,   0,   0, 10, 50),
+  (2, 1, 'Ladrillo', 100,   0,   0, 10, 50),
+  (3, 1, 'Oro',      100,   0,   0, 10, 50),
+  (4, 2, 'Madera',   200,   0,   0, 20, 100),
+  (5, 2, 'Ladrillo', 200,   0,   0, 20, 100),
+  (6, 2, 'Oro',      200,   0,   0, 20, 100),
+  (7, 3, 'Madera',   400,   0,   0, 40, 200),
+  (8, 3, 'Ladrillo', 400,   0,   0, 40, 200),
+  (9, 3, 'Oro',      400,   0,   0, 40, 200),
+  (10,4, 'Madera',   500,   0,   0, 50, 250),
+  (11,4, 'Ladrillo', 500,   0,   0, 50, 250),
+  (12,4, 'Oro',      500,   0,   0, 50, 250),
+  (13,5, 'Madera',   600,   0,   0, 70, 270),
+  (14,5, 'Ladrillo', 600,   0,   0, 70, 270),
+  (15,5, 'Oro',      600,   0,   0, 70, 270);
 
 -- 3.4. Parámetros globales (ejemplo)
 INSERT INTO PARAMETROS (Id_Parametros, Coste_Aldeanos, Coste_Casas, Capacidad_Por_Casa, Coste_Campamento)
@@ -158,7 +161,7 @@ BEGIN
       FROM CAMPAMENTOS
      WHERE Tipo = 'Madera'
        AND Id_Partida = p_IdPartida
-     LIMIT 1;  -- LIMIT para asegurar que solo un registro sea tomado
+     LIMIT 1;  -- Asegura que solo un registro sea tomado
 
     -- 2) Obtener costes de mejora del nivel actual
     SELECT Coste_Madera_Mejora, Coste_Ladrillo_Mejora
@@ -191,8 +194,12 @@ BEGIN
              Ladrillo = Ladrillo - v_Coste_Ladrillo
        WHERE Id_Partida = p_IdPartida;
 
-       SELECT CONCAT('Campamento de Madera subido de nivel. Madera ahora=', (v_Madera_Disponible - v_Coste_Madera),
-                     ', Ladrillo ahora=', (v_Ladrillo_Disponible - v_Coste_Ladrillo)) AS Mensaje;
+       SELECT CONCAT(
+         'Campamento de Madera subido de nivel. Madera ahora=', 
+         (v_Madera_Disponible - v_Coste_Madera), 
+         ', Ladrillo ahora=', 
+         (v_Ladrillo_Disponible - v_Coste_Ladrillo)
+       ) AS Mensaje;
     ELSE
        SELECT 'No hay suficientes recursos para mejorar el campamento de Madera.' AS Mensaje;
     END IF;
