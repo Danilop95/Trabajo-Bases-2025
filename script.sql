@@ -1,3 +1,5 @@
+create database if not exists `mi_db_juego`;
+use `mi_db_juego`;
 -- --------------------------------------------------------------
 -- 1) ELIMINAR TABLAS (si existen)
 -- --------------------------------------------------------------
