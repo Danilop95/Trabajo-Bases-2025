@@ -142,7 +142,92 @@ INSERT INTO ALDEANOS (Id_Aldeanos, Estado, Id_Partida, Id_Casa, Id_Campamentos)
 VALUES (1, 'Descansando', 1, 1, NULL);
 
 -- --------------------------------------------------------------
--- 4) PROCEDIMIENTO PARA SUBIR NIVEL CAMPAMENTO (Madera)
+-- 4 Añadimos los datos de los niveles de los campamentos (primero madera, luego ladrillo y oro)
+-- --------------------------------------------------------------
+
+-- 4.1 Nivel 1 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (1, 'Madera', 10, 10, 2, 10);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (1, 'Ladrillo', 10, 10, 2, 10);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (1, 'Oro', 20, 20, 2, 5);
+
+-- 4.2 Nivel 2 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (2, 'Madera', 25, 20, 5, 15);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (2, 'Ladrillo', 25, 20, 5, 15);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (2, 'Oro', 50, 50, 5, 7);
+
+-- 4.3 Nivel 3 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (3, 'Madera', 45, 35, 11, 20);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (3, 'Ladrillo', 45, 35, 11, 20);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (3, 'Oro', 90, 70, 11, 11);
+
+-- 4.4 Nivel 4 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (4, 'Madera', 53, 41, 16, 25);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (4, 'Ladrillo', 53, 41, 16, 25);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (4, 'Oro', 106, 82, 16, 15);
+
+-- 4.5 Nivel 5 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (5, 'Madera', 60, 50, 22, 30);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (5, 'Ladrillo', 60, 50, 22, 30);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (5, 'Oro', 120, 100, 22, 19);
+
+-- 4.6 Nivel 6 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (6, 'Madera', 73, 62, 27, 35);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (6, 'Ladrillo', 73, 62, 27, 35);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (6, 'Oro', 146, 124, 27, 22);
+
+-- 4.7 Nivel 7 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (7, 'Madera', 84, 71, 33, 40);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (7, 'Ladrillo', 84, 71, 33, 40);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (7, 'Oro', 168, 142, 33, 24);
+
+-- 4.8 Nivel 8 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (8, 'Madera', 96, 83, 38, 45);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (8, 'Ladrillo', 96, 83, 38, 45);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (8, 'Oro', 192, 166, 38, 27);
+
+-- 4.9 Nivel 9 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (9, 'Madera', 110, 97, 44, 50);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (9, 'Ladrillo', 110, 97, 44, 50);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (9, 'Oro', 220, 194, 44, 30);
+
+-- 4.10 Nivel 10 de los campamentos
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (10, 'Madera', 250, 225, 60, 55);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (10, 'Ladrillo', 250, 225, 60, 55);
+INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
+VALUES (10, 'Oro', 500, 450, 60, 33);
+
+
+-- --------------------------------------------------------------
+-- 5) PROCEDIMIENTO PARA SUBIR NIVEL CAMPAMENTO (Madera)
 --    Descarga de Madera y Ladrillo según DATOS_CAMPAMENTOS
 -- --------------------------------------------------------------
 DELIMITER $$
