@@ -1,5 +1,6 @@
-create database if not exists `mi_db_juego`;
-use `mi_db_juego`;
+CREATE DATABASE IF NOT EXISTS `mi_db_juego`;
+USE `mi_db_juego`;
+
 -- --------------------------------------------------------------
 -- 1) ELIMINAR TABLAS (si existen)
 -- --------------------------------------------------------------
@@ -12,12 +13,12 @@ DROP TABLE IF EXISTS DATOS_CAMPAMENTOS;
 DROP TABLE IF EXISTS PARAMETROS;
 
 -- --------------------------------------------------------------
--- 2) CREACIÓN DE TABLAS
+-- 2) CREACIÓN DE TABLAS CON PK AUTOINCREMENT
 -- --------------------------------------------------------------
 
 -- Tabla PARAMETROS (costes globales)
 CREATE TABLE PARAMETROS (
-  Id_Parametros        INT PRIMARY KEY,
+  Id_Parametros        INT AUTO_INCREMENT PRIMARY KEY,
   Coste_Aldeanos       INT NOT NULL,
   Coste_Casas          INT NOT NULL,
   Capacidad_Por_Casa   INT NOT NULL,
@@ -26,7 +27,7 @@ CREATE TABLE PARAMETROS (
 
 -- Tabla DATOS_CAMPAMENTOS (costes y producción por nivel y tipo)
 CREATE TABLE DATOS_CAMPAMENTOS (
-  Id_Datos_Campamentos       INT PRIMARY KEY,
+  Id_Datos_Campamentos       INT AUTO_INCREMENT PRIMARY KEY,
   Nivel                      INT NOT NULL,
   Tipo                       VARCHAR(50) NOT NULL, 
   Coste_Madera_Mejora        INT NOT NULL,
@@ -38,14 +39,14 @@ CREATE TABLE DATOS_CAMPAMENTOS (
 
 -- Tabla USUARIO (datos del jugador)
 CREATE TABLE USUARIO (
-  Id_Usuario    INT PRIMARY KEY,
+  Id_Usuario    INT AUTO_INCREMENT PRIMARY KEY,
   Nombre        VARCHAR(100) NOT NULL,
   Contraseña    VARCHAR(100) NOT NULL
 );
 
 -- Tabla PARTIDA (recursos y relación a USUARIO)
 CREATE TABLE PARTIDA (
-  Id_Partida    INT PRIMARY KEY,
+  Id_Partida    INT AUTO_INCREMENT PRIMARY KEY,
   Madera        INT NOT NULL,
   Ladrillo      INT NOT NULL,
   Oro           INT NOT NULL,
@@ -57,7 +58,7 @@ CREATE TABLE PARTIDA (
 
 -- Tabla CASAS (cada casa construida en una partida)
 CREATE TABLE CASAS (
-  Id_Casa     INT PRIMARY KEY,
+  Id_Casa     INT AUTO_INCREMENT PRIMARY KEY,
   Id_Partida  INT NOT NULL,
   CONSTRAINT fk_casas_partida
     FOREIGN KEY (Id_Partida) REFERENCES PARTIDA (Id_Partida)
@@ -65,7 +66,7 @@ CREATE TABLE CASAS (
 
 -- Tabla CAMPAMENTOS (tipos: Madera, Ladrillo, Oro; nivel, trabajadores, etc.)
 CREATE TABLE CAMPAMENTOS (
-  Id_Campamentos  INT PRIMARY KEY,
+  Id_Campamentos  INT AUTO_INCREMENT PRIMARY KEY,
   Tipo            VARCHAR(50) NOT NULL,
   Nivel           INT NOT NULL,
   N_Trabajadores  INT NOT NULL,
@@ -76,7 +77,7 @@ CREATE TABLE CAMPAMENTOS (
 
 -- Tabla ALDEANOS (estado y ubicación en casas o campamentos)
 CREATE TABLE ALDEANOS (
-  Id_Aldeanos     INT PRIMARY KEY,
+  Id_Aldeanos     INT AUTO_INCREMENT PRIMARY KEY,
   Estado          VARCHAR(50) NOT NULL,
   Id_Partida      INT NOT NULL,
   Id_Casa         INT,
@@ -224,7 +225,6 @@ INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_
 VALUES (10, 'Ladrillo', 250, 225, 60, 55);
 INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
 VALUES (10, 'Oro', 500, 450, 60, 33);
-
 
 -- --------------------------------------------------------------
 -- 5) PROCEDIMIENTO PARA SUBIR NIVEL CAMPAMENTO (Madera)
