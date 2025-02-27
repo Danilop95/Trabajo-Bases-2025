@@ -1,9 +1,8 @@
-CREATE DATABASE IF NOT EXISTS `mi_db_juego`;
-USE `mi_db_juego`;
+-- 1) CREACIÓN DE BASE DE DATOS
+CREATE DATABASE IF NOT EXISTS mi_db_juego;
+USE mi_db_juego;
 
--- --------------------------------------------------------------
--- 1) ELIMINAR TABLAS (si existen)
--- --------------------------------------------------------------
+-- 2) ELIMINAR TABLAS SI EXISTEN
 DROP TABLE IF EXISTS ALDEANOS;
 DROP TABLE IF EXISTS CAMPAMENTOS;
 DROP TABLE IF EXISTS CASAS;
@@ -12,11 +11,9 @@ DROP TABLE IF EXISTS USUARIO;
 DROP TABLE IF EXISTS DATOS_CAMPAMENTOS;
 DROP TABLE IF EXISTS PARAMETROS;
 
--- --------------------------------------------------------------
--- 2) CREACIÓN DE TABLAS CON PK AUTOINCREMENT
--- --------------------------------------------------------------
+-- 3) CREAR TABLAS
 
--- Tabla PARAMETROS (costes globales)
+-- Tabla PARAMETROS
 CREATE TABLE PARAMETROS (
   Id_Parametros        INT AUTO_INCREMENT PRIMARY KEY,
   Coste_Aldeanos       INT NOT NULL,
@@ -25,26 +22,26 @@ CREATE TABLE PARAMETROS (
   Coste_Campamento     INT NOT NULL
 );
 
--- Tabla DATOS_CAMPAMENTOS (costes y producción por nivel y tipo)
+-- Tabla DATOS_CAMPAMENTOS
 CREATE TABLE DATOS_CAMPAMENTOS (
   Id_Datos_Campamentos       INT AUTO_INCREMENT PRIMARY KEY,
   Nivel                      INT NOT NULL,
   Tipo                       VARCHAR(50) NOT NULL, 
   Coste_Madera_Mejora        INT NOT NULL,
   Coste_Ladrillo_Mejora      INT NOT NULL,
-  Coste_Oro_Mejora           INT NOT NULL,
+  Coste_Oro_Mejora           INT NOT NULL DEFAULT 0,  -- Con DEFAULT para evitar errores si no se especifica
   Numero_Trabajadores_Al_100 INT NOT NULL,
   Produccion                 INT NOT NULL
 );
 
--- Tabla USUARIO (datos del jugador)
+-- Tabla USUARIO
 CREATE TABLE USUARIO (
   Id_Usuario    INT AUTO_INCREMENT PRIMARY KEY,
   Nombre        VARCHAR(100) NOT NULL,
   Contraseña    VARCHAR(100) NOT NULL
 );
 
--- Tabla PARTIDA (recursos y relación a USUARIO)
+-- Tabla PARTIDA
 CREATE TABLE PARTIDA (
   Id_Partida    INT AUTO_INCREMENT PRIMARY KEY,
   Madera        INT NOT NULL,
@@ -56,7 +53,7 @@ CREATE TABLE PARTIDA (
     FOREIGN KEY (Id_Usuario) REFERENCES USUARIO (Id_Usuario)
 );
 
--- Tabla CASAS (cada casa construida en una partida)
+-- Tabla CASAS
 CREATE TABLE CASAS (
   Id_Casa     INT AUTO_INCREMENT PRIMARY KEY,
   Id_Partida  INT NOT NULL,
@@ -64,7 +61,7 @@ CREATE TABLE CASAS (
     FOREIGN KEY (Id_Partida) REFERENCES PARTIDA (Id_Partida)
 );
 
--- Tabla CAMPAMENTOS (tipos: Madera, Ladrillo, Oro; nivel, trabajadores, etc.)
+-- Tabla CAMPAMENTOS
 CREATE TABLE CAMPAMENTOS (
   Id_Campamentos  INT AUTO_INCREMENT PRIMARY KEY,
   Tipo            VARCHAR(50) NOT NULL,
@@ -75,7 +72,7 @@ CREATE TABLE CAMPAMENTOS (
     FOREIGN KEY (Id_Partida) REFERENCES PARTIDA (Id_Partida)
 );
 
--- Tabla ALDEANOS (estado y ubicación en casas o campamentos)
+-- Tabla ALDEANOS
 CREATE TABLE ALDEANOS (
   Id_Aldeanos     INT AUTO_INCREMENT PRIMARY KEY,
   Estado          VARCHAR(50) NOT NULL,
@@ -90,167 +87,86 @@ CREATE TABLE ALDEANOS (
     FOREIGN KEY (Id_Campamentos) REFERENCES CAMPAMENTOS(Id_Campamentos)
 );
 
--- --------------------------------------------------------------
--- 3) INSERCIÓN DE DATOS DE EJEMPLO
--- --------------------------------------------------------------
+-- 4) INSERTS DE EJEMPLO
 
--- 3.1. Usuario "AlvDan" (ID=1) con contraseña "lll"
-INSERT INTO USUARIO (Id_Usuario, Nombre, Contraseña)
-VALUES (1, 'AlvDan', 'lll');
+-- 4.1 Dos usuarios
+INSERT INTO USUARIO (Nombre, Contraseña)
+VALUES 
+('Alvaro', 'pass123'),
+('Daniel', 'abc456');
 
--- 3.2. Partida (ID=1) con recursos iniciales
---     Corrección: 500 Madera, 500 Ladrillo, 300 Oro
-INSERT INTO PARTIDA (Id_Partida, Madera, Ladrillo, Oro, Numero_Casas, Id_Usuario)
-VALUES (1, 500, 500, 300, 1, 1);
+-- 4.2 Cada usuario con su partida
+INSERT INTO PARTIDA (Madera, Ladrillo, Oro, Numero_Casas, Id_Usuario)
+VALUES 
+(500, 500, 300, 1, 1),  -- Partida para Alvaro (Id_Usuario=1)
+(800, 300, 100, 0, 2);  -- Partida para Daniel (Id_Usuario=2)
 
--- 3.3. Datos de campamentos (ejemplo, niveles 1 a 5 para Madera, Ladrillo, Oro)
---     Corrección: "Piedra" -> "Ladrillo" para coherencia con la descripción del juego
+-- 4.3 Parámetros globales
+INSERT INTO PARAMETROS (Coste_Aldeanos, Coste_Casas, Capacidad_Por_Casa, Coste_Campamento)
+VALUES (50, 100, 5, 200);
 
-INSERT INTO DATOS_CAMPAMENTOS
-  (Id_Datos_Campamentos, Nivel, Tipo, Coste_Madera_Mejora,
-   Coste_Ladrillo_Mejora, Coste_Oro_Mejora, Numero_Trabajadores_Al_100, Produccion)
+-- 4.4 Tablas de campamentos (ejemplos de 1 a 5)
+INSERT INTO DATOS_CAMPAMENTOS 
+  (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Coste_Oro_Mejora, Numero_Trabajadores_Al_100, Produccion)
 VALUES
-  (1, 1, 'Madera',   100,   0,   0, 10, 50),
-  (2, 1, 'Ladrillo', 100,   0,   0, 10, 50),
-  (3, 1, 'Oro',      100,   0,   0, 10, 50),
-  (4, 2, 'Madera',   200,   0,   0, 20, 100),
-  (5, 2, 'Ladrillo', 200,   0,   0, 20, 100),
-  (6, 2, 'Oro',      200,   0,   0, 20, 100),
-  (7, 3, 'Madera',   400,   0,   0, 40, 200),
-  (8, 3, 'Ladrillo', 400,   0,   0, 40, 200),
-  (9, 3, 'Oro',      400,   0,   0, 40, 200),
-  (10,4, 'Madera',   500,   0,   0, 50, 250),
-  (11,4, 'Ladrillo', 500,   0,   0, 50, 250),
-  (12,4, 'Oro',      500,   0,   0, 50, 250),
-  (13,5, 'Madera',   600,   0,   0, 70, 270),
-  (14,5, 'Ladrillo', 600,   0,   0, 70, 270),
-  (15,5, 'Oro',      600,   0,   0, 70, 270);
+  (1, 'Madera',   10, 10, 0,  2, 10),
+  (1, 'Ladrillo', 10, 10, 0,  2, 10),
+  (1, 'Oro',      10, 10, 0,  2,  5),
+  (2, 'Madera',   25, 20, 0,  5, 15),
+  (2, 'Ladrillo', 25, 20, 0,  5, 15),
+  (2, 'Oro',      50, 30, 0,  5,  7),
+  (3, 'Madera',   45, 35, 0, 11, 20),
+  (3, 'Ladrillo', 45, 35, 0, 11, 20),
+  (3, 'Oro',      90, 70, 0, 11, 11),
+  (4, 'Madera',   53, 41, 0, 16, 25),
+  (4, 'Ladrillo', 53, 41, 0, 16, 25),
+  (4, 'Oro',     106, 82, 0, 16, 15),
+  (5, 'Madera',   60, 50, 0, 22, 30),
+  (5, 'Ladrillo', 60, 50, 0, 22, 30),
+  (5, 'Oro',     120,100, 0, 22, 19);
 
--- 3.4. Parámetros globales (ejemplo)
-INSERT INTO PARAMETROS (Id_Parametros, Coste_Aldeanos, Coste_Casas, Capacidad_Por_Casa, Coste_Campamento)
-VALUES (1, 50, 100, 5, 200);
+-- 4.5 Agregar una casa en la partida de Alvaro
+INSERT INTO CASAS (Id_Partida) VALUES (1);
 
--- 3.5. Casa (Id=1) para la Partida (Id=1)
-INSERT INTO CASAS (Id_Casa, Id_Partida)
-VALUES (1, 1);
+-- 4.6 Campamentos iniciales
+--    Ej: Alvaro con un campamento de Madera nivel 1
+INSERT INTO CAMPAMENTOS (Tipo, Nivel, N_Trabajadores, Id_Partida)
+VALUES 
+('Madera', 1, 2, 1);
 
--- 3.6. Campamento de Madera nivel 1 en la Partida 1 (sin trabajadores)
-INSERT INTO CAMPAMENTOS (Id_Campamentos, Tipo, Nivel, N_Trabajadores, Id_Partida)
-VALUES (1, 'Madera', 1, 0, 1);
+--    Daniel con un campamento de Oro nivel 1
+INSERT INTO CAMPAMENTOS (Tipo, Nivel, N_Trabajadores, Id_Partida)
+VALUES 
+('Oro', 1, 1, 2);
 
--- 3.7. Un aldeano en estado "Descansando" en la misma partida
-INSERT INTO ALDEANOS (Id_Aldeanos, Estado, Id_Partida, Id_Casa, Id_Campamentos)
-VALUES (1, 'Descansando', 1, 1, NULL);
+-- 4.7 Aldeanos de ejemplo
+--    Un aldeano descansando en partida de Alvaro (en la Casa 1)
+INSERT INTO ALDEANOS (Estado, Id_Partida, Id_Casa)
+VALUES ('Descansando', 1, 1);
 
--- --------------------------------------------------------------
--- 4 Añadimos los datos de los niveles de los campamentos (primero madera, luego ladrillo y oro)
--- --------------------------------------------------------------
+--    Un aldeano trabajando en el campamento de Oro de Daniel
+INSERT INTO ALDEANOS (Estado, Id_Partida, Id_Campamentos)
+VALUES ('Trabajando', 2, 2);
 
--- 4.1 Nivel 1 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (1, 'Madera', 10, 10, 2, 10);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (1, 'Ladrillo', 10, 10, 2, 10);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (1, 'Oro', 20, 20, 2, 5);
+-- 5) PROCEDIMIENTOS Y TRIGGERS
 
--- 4.2 Nivel 2 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (2, 'Madera', 25, 20, 5, 15);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (2, 'Ladrillo', 25, 20, 5, 15);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (2, 'Oro', 50, 50, 5, 7);
-
--- 4.3 Nivel 3 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (3, 'Madera', 45, 35, 11, 20);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (3, 'Ladrillo', 45, 35, 11, 20);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (3, 'Oro', 90, 70, 11, 11);
-
--- 4.4 Nivel 4 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (4, 'Madera', 53, 41, 16, 25);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (4, 'Ladrillo', 53, 41, 16, 25);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (4, 'Oro', 106, 82, 16, 15);
-
--- 4.5 Nivel 5 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (5, 'Madera', 60, 50, 22, 30);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (5, 'Ladrillo', 60, 50, 22, 30);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (5, 'Oro', 120, 100, 22, 19);
-
--- 4.6 Nivel 6 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (6, 'Madera', 73, 62, 27, 35);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (6, 'Ladrillo', 73, 62, 27, 35);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (6, 'Oro', 146, 124, 27, 22);
-
--- 4.7 Nivel 7 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (7, 'Madera', 84, 71, 33, 40);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (7, 'Ladrillo', 84, 71, 33, 40);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (7, 'Oro', 168, 142, 33, 24);
-
--- 4.8 Nivel 8 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (8, 'Madera', 96, 83, 38, 45);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (8, 'Ladrillo', 96, 83, 38, 45);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (8, 'Oro', 192, 166, 38, 27);
-
--- 4.9 Nivel 9 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (9, 'Madera', 110, 97, 44, 50);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (9, 'Ladrillo', 110, 97, 44, 50);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (9, 'Oro', 220, 194, 44, 30);
-
--- 4.10 Nivel 10 de los campamentos
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (10, 'Madera', 250, 225, 60, 55);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (10, 'Ladrillo', 250, 225, 60, 55);
-INSERT INTO DATOS_CAMPAMENTOS (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Numero_Trabajadores_Al_100, Produccion) 
-VALUES (10, 'Oro', 500, 450, 60, 33);
-
--- --------------------------------------------------------------
--- 5) PROCEDIMIENTO PARA SUBIR NIVEL CAMPAMENTO (Madera)
---    Descarga de Madera y Ladrillo según DATOS_CAMPAMENTOS
--- --------------------------------------------------------------
+-- 5.1 Procedure para subir nivel de campamento (Madera)
 DELIMITER $$
-
-CREATE PROCEDURE subir_nivel_campamento_madera(
-  IN p_IdPartida INT
-)
+CREATE PROCEDURE subir_nivel_campamento_madera(IN p_IdPartida INT)
 BEGIN
-    DECLARE v_Coste_Madera INT DEFAULT 0;
-    DECLARE v_Coste_Ladrillo INT DEFAULT 0;
-    DECLARE v_Madera_Disponible INT DEFAULT 0;
+    DECLARE v_Coste_Madera        INT DEFAULT 0;
+    DECLARE v_Coste_Ladrillo      INT DEFAULT 0;
+    DECLARE v_Madera_Disponible   INT DEFAULT 0;
     DECLARE v_Ladrillo_Disponible INT DEFAULT 0;
-    DECLARE v_Nivel_Actual INT DEFAULT 0;
+    DECLARE v_Nivel_Actual        INT DEFAULT 0;
 
-    -- 1) Obtener nivel actual del campamento de Madera
     SELECT Nivel
       INTO v_Nivel_Actual
       FROM CAMPAMENTOS
      WHERE Tipo = 'Madera'
        AND Id_Partida = p_IdPartida
-     LIMIT 1;  -- Asegura que solo un registro sea tomado
+     LIMIT 1;
 
-    -- 2) Obtener costes de mejora del nivel actual
     SELECT Coste_Madera_Mejora, Coste_Ladrillo_Mejora
       INTO v_Coste_Madera, v_Coste_Ladrillo
       FROM DATOS_CAMPAMENTOS
@@ -258,24 +174,20 @@ BEGIN
        AND Tipo  = 'Madera'
      LIMIT 1;
 
-    -- 3) Obtener Madera y Ladrillo de la partida
     SELECT Madera, Ladrillo
       INTO v_Madera_Disponible, v_Ladrillo_Disponible
       FROM PARTIDA
      WHERE Id_Partida = p_IdPartida
      LIMIT 1;
 
-    -- 4) Verificar si hay recursos suficientes
     IF (v_Madera_Disponible >= v_Coste_Madera)
        AND (v_Ladrillo_Disponible >= v_Coste_Ladrillo)
     THEN
-       -- Subir el nivel del campamento
        UPDATE CAMPAMENTOS
          SET Nivel = Nivel + 1
        WHERE Tipo = 'Madera'
          AND Id_Partida = p_IdPartida;
 
-       -- Descontar los recursos al jugador
        UPDATE PARTIDA
          SET Madera   = Madera   - v_Coste_Madera,
              Ladrillo = Ladrillo - v_Coste_Ladrillo
@@ -288,10 +200,98 @@ BEGIN
          (v_Ladrillo_Disponible - v_Coste_Ladrillo)
        ) AS Mensaje;
     ELSE
-       SELECT 'No hay suficientes recursos para mejorar el campamento de Madera.' AS Mensaje;
+       SELECT 'No hay suficientes recursos para mejorar Campamento de Madera.' AS Mensaje;
     END IF;
 END$$
-
 DELIMITER ;
 
--- FIN DEL SCRIPT
+-- 5.2 Procedure para actualizar recursos (opcional, se llamará cada 1 min por EVENT)
+DELIMITER $$
+CREATE PROCEDURE actualizar_recursos_juego()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE camp_Id INT;
+    DECLARE camp_Tipo VARCHAR(50);
+    DECLARE camp_Nivel INT;
+    DECLARE camp_Trab INT;
+    DECLARE part_Id INT;
+    DECLARE dato_Prod INT;
+    DECLARE dato_Trab100 INT;
+    DECLARE recursoObtenido INT;
+
+    DECLARE curCamp CURSOR FOR
+        SELECT c.Id_Campamentos, c.Tipo, c.Nivel, c.N_Trabajadores, c.Id_Partida
+          FROM CAMPAMENTOS c;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN curCamp;
+    read_loop: LOOP
+        FETCH curCamp INTO camp_Id, camp_Tipo, camp_Nivel, camp_Trab, part_Id;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SELECT Produccion, Numero_Trabajadores_Al_100
+          INTO dato_Prod, dato_Trab100
+          FROM DATOS_CAMPAMENTOS
+         WHERE Nivel = camp_Nivel
+           AND Tipo  = camp_Tipo
+         LIMIT 1;
+
+        SET recursoObtenido = FLOOR(dato_Prod * camp_Trab / dato_Trab100);
+
+        IF camp_Tipo = 'Madera' THEN
+            UPDATE PARTIDA
+               SET Madera = Madera + recursoObtenido
+             WHERE Id_Partida = part_Id;
+        ELSEIF camp_Tipo = 'Ladrillo' THEN
+            UPDATE PARTIDA
+               SET Ladrillo = Ladrillo + recursoObtenido
+             WHERE Id_Partida = part_Id;
+        ELSEIF camp_Tipo = 'Oro' THEN
+            UPDATE PARTIDA
+               SET Oro = Oro + recursoObtenido
+             WHERE Id_Partida = part_Id;
+        END IF;
+    END LOOP;
+    CLOSE curCamp;
+END$$
+DELIMITER ;
+
+-- 5.3 Trigger para evitar recursos negativos en PARTIDA
+DELIMITER $$
+CREATE TRIGGER trg_no_recursos_negativos
+BEFORE UPDATE ON PARTIDA
+FOR EACH ROW
+BEGIN
+    IF NEW.Madera < 0 THEN SET NEW.Madera = 0; END IF;
+    IF NEW.Ladrillo < 0 THEN SET NEW.Ladrillo = 0; END IF;
+    IF NEW.Oro < 0 THEN SET NEW.Oro = 0; END IF;
+END$$
+DELIMITER ;
+
+-- 6) EVENT OPCIONAL (ACTUALIZACIÓN DE RECURSOS CADA 1 MINUTO)
+DELIMITER $$
+CREATE EVENT IF NOT EXISTS ev_update_recursos
+ON SCHEDULE EVERY 1 MINUTE
+ON COMPLETION PRESERVE
+DO
+BEGIN
+   CALL actualizar_recursos_juego();
+END$$
+DELIMITER ;
+
+-- 7) VISTA DE RANKING POR ORO
+CREATE OR REPLACE VIEW V_RANKING AS
+SELECT 
+    u.Id_Usuario,
+    u.Nombre,
+    p.Oro,
+    DENSE_RANK() OVER (ORDER BY p.Oro DESC) AS Posicion
+FROM USUARIO u
+JOIN PARTIDA p ON u.Id_Usuario = p.Id_Usuario;
+
+-- Uso:
+--   SELECT * FROM V_RANKING ORDER BY Posicion;
+
+
