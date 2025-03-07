@@ -4,14 +4,13 @@ services:
   db:
     image: mysql:8.0
     container_name: mysql_db
-    # Variables de entorno para MySQL
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-mi_basedatos}
-      - MYSQL_USER=${MYSQL_USER:-usuario}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"        # Exponemos el puerto de MySQL
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     restart: unless-stopped
@@ -21,16 +20,33 @@ services:
     container_name: phpmyadmin
     depends_on:
       - db
-    # Variables de entorno para phpMyAdmin
     environment:
-      - PMA_HOST=${PMA_HOST:-db}        # Nombre del servicio de MySQL
-      - PMA_PORT=${PMA_PORT:-3306}
-      - PMA_USER=${MYSQL_USER:-usuario} # Coinciden con el usuario creado en MySQL
-      - PMA_PASSWORD=${MYSQL_PASSWORD:-password}
-      # Opcional: Controlar el valor de upload/import
+      - PMA_HOST=${PMA_HOST}
+      - PMA_PORT=${PMA_PORT}
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
       - UPLOAD_LIMIT=300M
     ports:
-      - "8080:80"          # Abrimos phpMyAdmin en el puerto 8080
+      - "${HOST_PORT_HTTP}:80"
+    restart: unless-stopped
+
+  # Contenedor con Apache + PHP
+  app:
+    build: .
+    container_name: php_app
+    depends_on:
+      - db
+    ports:
+      - "${HOST_PORT_APACHE}:80"
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - USER_ID=1000
+      - GROUP_ID=1000
     restart: unless-stopped
 
 volumes:
