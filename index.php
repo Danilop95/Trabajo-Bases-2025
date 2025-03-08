@@ -136,7 +136,7 @@ if (isset($_SESSION['usuario_id'])) {
     }
 }
 
-// --- 5) MOSTRAR HTML -------------------------------------------------------
+// --- 5) MOSTRAR HTML -----
 ?>
 <!DOCTYPE html>
 <html lang="es">

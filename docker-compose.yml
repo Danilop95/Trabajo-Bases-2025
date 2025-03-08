@@ -9,6 +9,7 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_HOST=%
     ports:
       - "3306:3306"
     volumes:
@@ -17,7 +18,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: phpmyadmin
+    container_name: phpmyadmin-dg
     depends_on:
       - db
     environment:
@@ -33,7 +34,7 @@ services:
   # Contenedor con Apache + PHP
   app:
     build: .
-    container_name: php_app
+    container_name: php_app_bases
     depends_on:
       - db
     ports:
