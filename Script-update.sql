@@ -1,15 +1,13 @@
 -- ==============================================
--- Script SQL Definitivo para "Gestión de Recursos y Construcción de Asentamientos"
--- Incluye: Bonificaciones, Log de Acciones, Creación/Mejora de Campamentos, etc.
+-- ℭ𝔩𝔞𝔰𝔥 𝔒𝔣 𝔅𝔞𝔰𝔢𝔰
 -- ==============================================
 
--- 1) CREACIÓN DE LA BASE DE DATOS
+
 CREATE DATABASE IF NOT EXISTS mi_db_juego;
 USE mi_db_juego;
 
--- 2) ELIMINAR TABLAS SI EXISTEN (en orden para respetar claves foráneas)
+
 DROP TABLE IF EXISTS LOG_ACCIONES;
-DROP TABLE IF EXISTS BONIFICACION;
 DROP TABLE IF EXISTS ALDEANOS;
 DROP TABLE IF EXISTS CAMPAMENTOS;
 DROP TABLE IF EXISTS CASAS;
@@ -18,7 +16,7 @@ DROP TABLE IF EXISTS USUARIO;
 DROP TABLE IF EXISTS DATOS_CAMPAMENTOS;
 DROP TABLE IF EXISTS PARAMETROS;
 
--- 3) CREACIÓN DE TABLAS
+-- CREACIÓN DE TABLAS
 
 -- Tabla PARAMETROS (costes globales y capacidad por casa)
 CREATE TABLE PARAMETROS (
@@ -29,8 +27,7 @@ CREATE TABLE PARAMETROS (
   Coste_Campamento INT NOT NULL
 ) ENGINE=InnoDB;
 
--- Tabla DATOS_CAMPAMENTOS (niveles, costes de mejora y producción para cada tipo)
--- Se incluye un CHECK para que Nivel esté entre 1 y 5 (en MySQL 8+)
+
 CREATE TABLE DATOS_CAMPAMENTOS (
   Id_Datos_Campamentos INT AUTO_INCREMENT PRIMARY KEY,
   Nivel INT NOT NULL CHECK (Nivel BETWEEN 1 AND 5),
@@ -89,22 +86,11 @@ CREATE TABLE ALDEANOS (
   CONSTRAINT fk_aldeanos_camp FOREIGN KEY (Id_Campamentos) REFERENCES CAMPAMENTOS(Id_Campamentos)
 ) ENGINE=InnoDB;
 
--- Tabla BONIFICACION (eventos temporales que afectan la producción)
-CREATE TABLE BONIFICACION (
-  Id_Bonificacion INT AUTO_INCREMENT PRIMARY KEY,
-  Id_Partida INT NOT NULL,
-  Tipo VARCHAR(50) NOT NULL,        -- Ej.: 'produccion'
-  Factor DECIMAL(5,2) NOT NULL,     -- Ej.: 1.20 para +20% de producción
-  Fecha_Inicio DATETIME NOT NULL,
-  Fecha_Fin DATETIME NOT NULL,
-  CONSTRAINT fk_bonificacion_partida FOREIGN KEY (Id_Partida) REFERENCES PARTIDA(Id_Partida)
-) ENGINE=InnoDB;
-
 -- Tabla LOG_ACCIONES (para registrar acciones importantes del juego)
 CREATE TABLE LOG_ACCIONES (
   Id_Log INT AUTO_INCREMENT PRIMARY KEY,
   Id_Partida INT NOT NULL,
-  TipoAccion VARCHAR(50) NOT NULL,   -- Ej.: 'reclutar', 'mejorar', 'construir', 'asignar'
+  TipoAccion VARCHAR(50) NOT NULL,   
   Descripcion TEXT NOT NULL,
   Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_log_partida FOREIGN KEY (Id_Partida) REFERENCES PARTIDA(Id_Partida)
@@ -117,26 +103,25 @@ CREATE INDEX idx_campamentos_partida ON CAMPAMENTOS(Id_Partida);
 CREATE INDEX idx_aldeanos_partida ON ALDEANOS(Id_Partida);
 CREATE INDEX idx_aldeanos_casa ON ALDEANOS(Id_Casa);
 CREATE INDEX idx_aldeanos_camp ON ALDEANOS(Id_Campamentos);
-CREATE INDEX idx_bonificacion_partida ON BONIFICACION(Id_Partida);
 CREATE INDEX idx_log_partida ON LOG_ACCIONES(Id_Partida);
 
 -- 4) INSERTS DE PRUEBA
 
--- 4.1 Insertar Usuarios
+-- Insertar Usuarios
 INSERT INTO USUARIO (Nombre, Contraseña)
 VALUES ('Alvaro', 'pass123'),
        ('Daniel', 'abc456');
 
--- 4.2 Insertar Partidas para cada usuario
+-- Insertar Partidas para cada usuario
 INSERT INTO PARTIDA (Madera, Ladrillo, Oro, Numero_Casas, Id_Usuario)
 VALUES (500, 500, 300, 1, 1),  -- Partida de Alvaro
        (800, 300, 100, 0, 2);  -- Partida de Daniel
 
--- 4.3 Insertar Parámetros Globales
+-- Insertar Parámetros Globales
 INSERT INTO PARAMETROS (Coste_Aldeanos, Coste_Casas, Capacidad_Por_Casa, Coste_Campamento)
 VALUES (50, 100, 5, 200);
 
--- 4.4 Insertar Datos de Campamentos (niveles 1 a 5 para cada tipo)
+-- Insertar Datos de Campamentos (niveles 1 a 5 para cada tipo)
 INSERT INTO DATOS_CAMPAMENTOS 
   (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Coste_Oro_Mejora, Numero_Trabajadores_Al_100, Produccion)
 VALUES
@@ -158,28 +143,24 @@ VALUES
   (4, 'Oro',     106, 82,  0, 16, 15),
   (5, 'Oro',     120,100,  0, 22, 19);
 
--- 4.5 Insertar una Casa para la partida de Alvaro
+-- Insertar una Casa para la partida de Alvaro
 INSERT INTO CASAS (Id_Partida)
 VALUES (1);
 
--- 4.6 Insertar Campamentos Iniciales (puedes iniciar varios por tipo)
+-- Insertar Campamentos Iniciales (puedes iniciar varios por tipo)
 INSERT INTO CAMPAMENTOS (Tipo, Nivel, N_Trabajadores, Id_Partida)
 VALUES ('Madera', 1, 2, 1),   -- Campamento de Madera para Alvaro
        ('Oro', 1, 1, 2);      -- Campamento de Oro para Daniel
 
--- 4.7 Insertar Aldeanos
+-- Insertar Aldeanos
 INSERT INTO ALDEANOS (Estado, Id_Partida, Id_Casa)
 VALUES ('Descansando', 1, 1);
 INSERT INTO ALDEANOS (Estado, Id_Partida, Id_Campamentos)
 VALUES ('Trabajando', 2, 2);
 
--- 4.8 (Opcional) Insertar un evento de bonificación para producción
-INSERT INTO BONIFICACION (Id_Partida, Tipo, Factor, Fecha_Inicio, Fecha_Fin)
-VALUES (1, 'produccion', 1.20, NOW(), DATE_ADD(NOW(), INTERVAL 30 MINUTE));
+-- PROCEDURES, TRIGGERS, EVENTOS Y LOG
 
--- 5) PROCEDURES, TRIGGERS, EVENTOS Y LOG
-
--- 5.A Procedimiento para registrar un log de acción
+-- Procedimiento para registrar un log de acción
 DELIMITER $$
 CREATE PROCEDURE log_accion(IN p_IdPartida INT, IN p_TipoAccion VARCHAR(50), IN p_Descripcion TEXT)
 BEGIN
@@ -188,7 +169,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 5.1 Procedimiento para subir nivel de un campamento
+-- Procedimiento para subir nivel de un campamento
 -- Parámetros: p_IdPartida, p_Tipo ('Madera', 'Ladrillo' o 'Oro')
 DELIMITER $$
 CREATE PROCEDURE subir_nivel_campamento(IN p_IdPartida INT, IN p_Tipo VARCHAR(50))
@@ -294,7 +275,7 @@ subir_nivel: BEGIN
 END subir_nivel$$
 DELIMITER ;
 
--- 5.2 Procedimiento para modificar la asignación de trabajadores en un campamento
+-- Procedimiento para modificar la asignación de trabajadores en un campamento
 DELIMITER $$
 CREATE PROCEDURE modificar_asignacion_trabajadores(IN p_IdCampamentos INT, IN p_NuevoValor INT)
 mod_asig: BEGIN
@@ -313,7 +294,7 @@ mod_asig: BEGIN
 END mod_asig$$
 DELIMITER ;
 
--- 5.3 Procedimiento para actualizar los recursos generados por los campamentos
+-- Procedimiento para actualizar los recursos generados por los campamentos
 DELIMITER $$
 CREATE PROCEDURE actualizar_recursos_juego()
 BEGIN
@@ -339,14 +320,6 @@ BEGIN
       IF done THEN
          LEAVE read_loop;
       END IF;
-      
-      -- Verificar bonificación activa
-      SELECT COALESCE(MAX(Factor), 1)
-        INTO v_Bonus
-        FROM BONIFICACION
-       WHERE Id_Partida = part_Id
-         AND Tipo = 'produccion'
-         AND NOW() BETWEEN Fecha_Inicio AND Fecha_Fin;
       
       SELECT Produccion, Numero_Trabajadores_Al_100
         INTO dato_Prod, dato_Trab100
@@ -375,7 +348,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 5.4 Procedimiento para reclutar un aldeano
+-- Procedimiento para reclutar un aldeano
 DELIMITER $$
 CREATE PROCEDURE reclutar_aldeano(IN p_IdPartida INT)
 reclutar: BEGIN
@@ -435,7 +408,7 @@ reclutar: BEGIN
 END reclutar$$
 DELIMITER ;
 
--- 5.5 Procedimiento para construir una casa
+-- Procedimiento para construir una casa
 DELIMITER $$
 CREATE PROCEDURE construir_casa(IN p_IdPartida INT)
 construir: BEGIN
@@ -481,7 +454,7 @@ construir: BEGIN
 END construir$$
 DELIMITER ;
 
--- 5.6 Procedimiento para asignar un aldeano a un campamento
+-- Procedimiento para asignar un aldeano a un campamento
 DELIMITER $$
 CREATE PROCEDURE asignar_aldeano_a_campamento(IN p_IdAldeano INT, IN p_IdCampamentos INT)
 BEGIN
@@ -501,7 +474,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 5.7 Trigger para evitar que los recursos en PARTIDA sean negativos
+-- Trigger para evitar que los recursos en PARTIDA sean negativos
 DELIMITER $$
 CREATE TRIGGER trg_no_recursos_negativos
 BEFORE UPDATE ON PARTIDA
@@ -519,7 +492,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 5.8 EVENTO: Actualización de recursos cada 1 minuto
+-- EVENTO: Actualización de recursos cada 1 minuto
 DELIMITER $$
 CREATE EVENT IF NOT EXISTS ev_update_recursos
 ON SCHEDULE EVERY 1 MINUTE
@@ -530,7 +503,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 5.9 Procedimiento para crear un nuevo campamento
+-- Procedimiento para crear un nuevo campamento
 DELIMITER $$
 CREATE PROCEDURE crear_campamento(IN p_IdPartida INT, IN p_Tipo VARCHAR(50))
 BEGIN
@@ -584,8 +557,108 @@ BEGIN
     SELECT v_Mensaje AS Mensaje;
 END$$
 DELIMITER ;
+-- Mejorar campamentos
+DELIMITER $$
+CREATE PROCEDURE subir_nivel_campamento_por_id(IN p_IdCamp INT, IN p_IdPartida INT)
+subir: BEGIN
+    DECLARE v_Tipo VARCHAR(50);
+    DECLARE v_Nivel_Actual INT DEFAULT 0;
+    DECLARE v_NivelMax INT DEFAULT 0;
+    DECLARE v_Coste_Madera INT DEFAULT 0;
+    DECLARE v_Coste_Ladrillo INT DEFAULT 0;
+    DECLARE v_Coste_Oro INT DEFAULT 0;
+    DECLARE v_Recurso1 INT;
+    DECLARE v_Recurso2 INT;
+    DECLARE v_Recurso3 INT;
+    DECLARE v_Mensaje VARCHAR(255);
 
--- 5.10 Vista de Ranking Completo
+    START TRANSACTION;
+    
+    -- Obtener el tipo y el nivel actual del campamento específico
+    SELECT Tipo, Nivel 
+      INTO v_Tipo, v_Nivel_Actual
+      FROM CAMPAMENTOS
+     WHERE Id_Campamentos = p_IdCamp
+     LIMIT 1;
+    
+    -- Obtener el nivel máximo para ese tipo de campamento
+    SELECT MAX(Nivel)
+      INTO v_NivelMax
+      FROM DATOS_CAMPAMENTOS
+     WHERE Tipo = v_Tipo;
+    
+    IF v_Nivel_Actual >= v_NivelMax THEN
+      SET v_Mensaje = CONCAT('El campamento de ', v_Tipo, ' ya está en el nivel máximo.');
+      ROLLBACK;
+      SELECT v_Mensaje AS Mensaje;
+      LEAVE subir;
+    END IF;
+    
+    -- Obtener los costes de mejora para el nivel actual del campamento
+    SELECT Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Coste_Oro_Mejora
+      INTO v_Coste_Madera, v_Coste_Ladrillo, v_Coste_Oro
+      FROM DATOS_CAMPAMENTOS
+     WHERE Nivel = v_Nivel_Actual
+       AND Tipo = v_Tipo
+     LIMIT 1;
+    
+    IF v_Tipo = 'Oro' THEN
+      -- Mejorar campamento de Oro usando Oro
+      SELECT Oro INTO v_Recurso3
+        FROM PARTIDA
+       WHERE Id_Partida = p_IdPartida
+       LIMIT 1;
+      
+      IF v_Recurso3 >= v_Coste_Oro THEN
+         UPDATE CAMPAMENTOS
+           SET Nivel = Nivel + 1
+         WHERE Id_Campamentos = p_IdCamp;
+         
+         UPDATE PARTIDA
+           SET Oro = Oro - v_Coste_Oro
+         WHERE Id_Partida = p_IdPartida;
+         
+         SET v_Mensaje = CONCAT('Campamento de Oro subido de nivel. Oro restante: ', (v_Recurso3 - v_Coste_Oro));
+      ELSE
+         SET v_Mensaje = 'No hay suficientes recursos para mejorar el Campamento de Oro.';
+         ROLLBACK;
+         SELECT v_Mensaje AS Mensaje;
+         LEAVE subir;
+      END IF;
+    ELSE
+      -- Mejorar campamento de Madera o Ladrillo usando madera y ladrillo
+      SELECT Madera, Ladrillo
+        INTO v_Recurso1, v_Recurso2
+        FROM PARTIDA
+       WHERE Id_Partida = p_IdPartida
+       LIMIT 1;
+      
+      IF (v_Recurso1 >= v_Coste_Madera) AND (v_Recurso2 >= v_Coste_Ladrillo) THEN
+         UPDATE CAMPAMENTOS
+           SET Nivel = Nivel + 1
+         WHERE Id_Campamentos = p_IdCamp;
+         
+         UPDATE PARTIDA
+           SET Madera = Madera - v_Coste_Madera,
+               Ladrillo = Ladrillo - v_Coste_Ladrillo
+         WHERE Id_Partida = p_IdPartida;
+         
+         SET v_Mensaje = CONCAT('Campamento de ', v_Tipo, ' subido de nivel.');
+      ELSE
+         SET v_Mensaje = CONCAT('No hay suficientes recursos para mejorar el Campamento de ', v_Tipo, '.');
+         ROLLBACK;
+         SELECT v_Mensaje AS Mensaje;
+         LEAVE subir;
+      END IF;
+    END IF;
+    
+    CALL log_accion(p_IdPartida, 'mejorar', v_Mensaje);
+    COMMIT;
+    SELECT v_Mensaje AS Mensaje;
+END subir$$
+DELIMITER ;
+
+-- Vista de Ranking Completo
 CREATE OR REPLACE VIEW V_RANKING_COMPLETO AS
 SELECT
     u.Id_Usuario,
@@ -616,6 +689,3 @@ LEFT JOIN (
 ) a ON p.Id_Partida = a.Id_Partida
 ORDER BY Puntaje DESC;
 
--- ==============================================
--- Fin del Script SQL Definitivo
--- ==============================================
