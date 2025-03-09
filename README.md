@@ -1,12 +1,23 @@
-            ____ _           _        ___   __   ____                      
-           / ___| | __ _ ___| |__    / _ \ / _| | __ )  __ _ ___  ___  ___ 
-          | |   | |/ _` / __| '_ \  | | | | |_  |  _ \ / _` / __|/ _ \/ __|
-          | |___| | (_| \__ \ | | | | |_| |  _| | |_) | (_| \__ \  __/\__ \
-           \____|_|\__,_|___/_| |_|  \___/|_|   |____/ \__,_|___/\___||___/
+                  # ###   ###                           /             # ###       /##       ##### ##                                            
+                /  /###  / ###                        #/            /  /###     #/ ###   ######  /##                                            
+               /  /  ###/   ##                        ##           /  /  ###   ##   ### /#   /  / ##                                            
+              /  ##   ##    ##                        ##          /  ##   ###  ##      /    /  /  ##                                            
+             /  ###         ##                        ##         /  ###    ### ##          /  /   /                                             
+            ##   ##         ##      /###      /###    ##  /##   ##   ##     ## ######     ## ##  /        /###      /###      /##       /###    
+            ##   ##         ##     / ###  /  / #### / ## / ###  ##   ##     ## #####      ## ## /        / ###  /  / #### /  / ###     / #### / 
+            ##   ##         ##    /   ###/  ##  ###/  ##/   ### ##   ##     ## ##         ## ##/        /   ###/  ##  ###/  /   ###   ##  ###/  
+            ##   ##         ##   ##    ##  ####       ##     ## ##   ##     ## ##         ## ## ###    ##    ##  ####      ##    ### ####       
+            ##   ##         ##   ##    ##    ###      ##     ## ##   ##     ## ##         ## ##   ###  ##    ##    ###     ########    ###      
+             ##  ##         ##   ##    ##      ###    ##     ##  ##  ##     ## ##         #  ##     ## ##    ##      ###   #######       ###    
+              ## #      /   ##   ##    ##        ###  ##     ##   ## #      /  ##            /      ## ##    ##        ### ##              ###  
+               ###     /    ##   ##    /#   /###  ##  ##     ##    ###     /   ##        /##/     ###  ##    /#   /###  ## ####    /  /###  ##  
+                ######/     ### / ####/ ## / #### /   ##     ##     ######/    ##       /  ########     ####/ ## / #### /   ######/  / #### /   
+                  ###        ##/   ###   ##   ###/     ##    ##       ###       ##     /     ####        ###   ##   ###/     #####      ###/    
+                                                             /                         #                                                        
+                                                            /                           ##                                                      
+                                                           /                                                                                    
+                                                          /                                                                                     
                                                                            
-============
-                                                                      
-# Entrega del Proyecto Aldea
 
 ## 1. Introducción
 
@@ -27,6 +38,9 @@
 
 ## 2. Diagrama Entidad-Relación (ER)
 
+![image](https://github.com/user-attachments/assets/0005da7c-fbc1-44d1-aae7-940b12e19904)
+
+
 **Descripción:**  
 El diagrama ER final refleja la estructura y las relaciones entre las siguientes entidades:  
 - **USUARIO:** Datos de acceso del jugador.  
@@ -36,8 +50,6 @@ El diagrama ER final refleja la estructura y las relaciones entre las siguientes
 - **ALDEANOS:** Trabajadores asignados a tareas, que pueden estar en estado "Descansando" o "Trabajando".  
 - **DATOS_CAMPAMENTOS:** Niveles de campamentos, costes de mejora y producción asociada.  
 - **LOG_ACCIONES:** Registro de acciones importantes del juego.
-
-*(Inserta aquí la imagen del diagrama ER corregido y ajustado a la versión final.)*
 
 ---
 
@@ -381,6 +393,9 @@ DELIMITER ;
 ---
 
 ## 5. Aplicación PHP
+![image](https://github.com/user-attachments/assets/9f8db1b8-1064-4b7b-9e8e-16d49d959692)
+
+
 
 ### 5.1 Descripción General
 
@@ -407,7 +422,6 @@ La aplicación cuenta con un archivo `index.php` que integra:
 - Inclusión de Bootstrap y FontAwesome para el diseño y estilo.
 - Soporte para Docker, ya que el proyecto se despliega con un `docker-compose.yml` y archivos relacionados.
 
-*(Inserta aquí el código PHP completo o un resumen de sus partes más relevantes, resaltando las funcionalidades clave.)*
 
 ---
 
@@ -429,7 +443,7 @@ La aplicación cuenta con un archivo `index.php` que integra:
 1. **Clonar el Repositorio:**
    - Clona el proyecto en tu máquina:
      ```bash
-     git clone <URL_del_repositorio>
+     git clone https://github.com/Danilop95/Trabajo-Bases-2025.git
      cd Trabajo-Bases-2025
      ```
 
@@ -477,11 +491,7 @@ La aplicación cuenta con un archivo `index.php` que integra:
 
 ---
 
-## 7. Conclusiones y Recomendaciones
-
-**Conclusiones:**  
-- Se ha desarrollado un sistema completo de gestión de recursos para un juego de simulación, integrando diseño de base de datos, lógica SQL (procedures, triggers y eventos) y una aplicación PHP interactiva.  
-- La implementación de actualizaciones en tiempo real mediante AJAX mejora la experiencia del usuario.
+## 7. Recomendaciones
 
 **Recomendaciones:**  
 - Se recomienda utilizar Docker para un despliegue consistente y sencillo, aprovechando el archivo `docker-compose.yml` y las variables de entorno definidas en `.env`.  
