@@ -5,12 +5,6 @@
     \____/_/\__,_/____/_/ /_/   \____/_/    /_____/\__,_/____/\___/____/  
                                                                                                                                                      
                           Daniel Y Alvaro
-## 1. Introducción
-
-**Alcance:**  
-- **Base de Datos:** Se ha diseñado la estructura de la base de datos (tablas, relaciones y restricciones) junto con datos de prueba.  
-- **Lógica SQL:** Se han implementado procedimientos (procedures), triggers y un EVENT opcional para la actualización de recursos cada minuto.  
-- **Aplicación PHP:** Se desarrolla una interfaz web que permite interactuar con la base de datos mediante llamadas a procedimientos almacenados. La actualización dinámica de datos se realiza a través de AJAX.
 
 **Tecnologías y Herramientas Recomendadas:**  
 - **Base de Datos:** MySQL 8.0 (para ejecutar el script SQL)  
@@ -22,7 +16,7 @@
 
 ---
 
-## 2. Diagrama Entidad-Relación (ER)
+## 1. Diagrama Entidad-Relación (ER)
 
 ![image](https://github.com/user-attachments/assets/0005da7c-fbc1-44d1-aae7-940b12e19904)
 
@@ -39,9 +33,9 @@ El diagrama ER final refleja la estructura y las relaciones entre las siguientes
 
 ---
 
-## 3. Estructura de la Base de Datos
+## 2. Estructura de la Base de Datos
 
-### 3.1 Código de los CREATE TABLES
+### 2.1 Código de los CREATE TABLES
 
 El siguiente script SQL crea la base de datos y define las tablas necesarias para el sistema:
 
@@ -150,7 +144,7 @@ CREATE INDEX idx_aldeanos_camp ON ALDEANOS(Id_Campamentos);
 CREATE INDEX idx_log_partida ON LOG_ACCIONES(Id_Partida);
 ```
 
-### 3.2 Código de los INSERTS de Prueba
+### 2.2 Código de los INSERTS de Prueba
 
 El siguiente script inserta datos de prueba para verificar el funcionamiento del sistema:
 
@@ -207,9 +201,9 @@ VALUES ('Trabajando', 2, 2);
 
 ---
 
-## 4. Lógica de Negocio en SQL
+## 3. Lógica de Negocio en SQL
 
-### 4.1 Procedures
+### 3.1 Procedures
 
 Se han creado procedimientos para implementar la lógica del juego. Algunos de ellos son:
 
@@ -337,7 +331,7 @@ END subir$$
 DELIMITER ;
 ```
 
-### 4.2 Triggers
+### 3.2 Triggers
 
 Se ha creado el siguiente trigger para asegurar que los recursos no se vuelvan negativos:
 
@@ -360,7 +354,7 @@ END$$
 DELIMITER ;
 ```
 
-### 4.3 EVENTOS (Opcional para sobresaliente)
+### 3.3 EVENTOS (Opcional para sobresaliente)
 
 Para la actualización automática de recursos, se ha creado el siguiente EVENT que se ejecuta cada 1 minuto:
 
@@ -378,12 +372,12 @@ DELIMITER ;
 
 ---
 
-## 5. Aplicación PHP
+## 4. Aplicación PHP
 ![image](https://github.com/user-attachments/assets/9f8db1b8-1064-4b7b-9e8e-16d49d959692)
 
 
 
-### 5.1 Descripción General
+### 4.1 Descripción General
 
 La aplicación PHP se encarga de:  
 - Conectarse a la base de datos utilizando PDO.  
@@ -392,7 +386,7 @@ La aplicación PHP se encarga de:
 - Ejecutar procedimientos almacenados a través de formularios (por ejemplo, construir casa, reclutar aldeano, crear campamento, mejorar campamento, asignar/reasignar aldeanos).  
 - Actualizar de forma dinámica la información mediante AJAX.
 
-### 5.2 Código PHP y Estructura de la Interfaz
+### 4.2 Código PHP y Estructura de la Interfaz
 
 La aplicación cuenta con un archivo `index.php` que integra:
 - Conexión a la base de datos y manejo de sesión.
@@ -411,9 +405,9 @@ La aplicación cuenta con un archivo `index.php` que integra:
 
 ---
 
-## 6. Despliegue del Proyecto
+## 5. Despliegue del Proyecto
 
-### 6.1 Requisitos de Despliegue
+### 5.1 Requisitos de Despliegue
 
 - **Docker y Docker Compose:**  
   Se recomienda usar Docker para simplificar el despliegue. Se ha configurado un `docker-compose.yml` que define tres servicios:
@@ -477,7 +471,7 @@ La aplicación cuenta con un archivo `index.php` que integra:
 
 ---
 
-## 7. Recomendaciones
+## 6. Recomendaciones
 
 **Recomendaciones:**  
 - Se recomienda utilizar Docker para un despliegue consistente y sencillo, aprovechando el archivo `docker-compose.yml` y las variables de entorno definidas en `.env`.  
