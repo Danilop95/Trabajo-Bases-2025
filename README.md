@@ -1,207 +1,491 @@
-# Proyecto: Gestión de Recursos y Construcción de Asentamientos
+            ____ _           _        ___   __   ____                      
+           / ___| | __ _ ___| |__    / _ \ / _| | __ )  __ _ ___  ___  ___ 
+          | |   | |/ _` / __| '_ \  | | | | |_  |  _ \ / _` / __|/ _ \/ __|
+          | |___| | (_| \__ \ | | | | |_| |  _| | |_) | (_| \__ \  __/\__ \
+           \____|_|\__,_|___/_| |_|  \___/|_|   |____/ \__,_|___/\___||___/
+                                                                           
+============
+                                                                      
+# Entrega del Proyecto Aldea
 
-## Descripción del Proyecto
+## 1. Introducción
 
-Este proyecto es un juego de estrategia y gestión de recursos donde los jugadores deben construir y administrar un asentamiento de manera eficiente. Utilizando bases de datos para el almacenamiento de información relevante, los jugadores podrán construir edificios, reclutar aldeanos y mejorar campamentos para optimizar la producción de recursos.
+**Alcance:**  
+- **Base de Datos:** Se ha diseñado la estructura de la base de datos (tablas, relaciones y restricciones) junto con datos de prueba.  
+- **Lógica SQL:** Se han implementado procedimientos (procedures), triggers y un EVENT opcional para la actualización de recursos cada minuto.  
+- **Aplicación PHP:** Se desarrolla una interfaz web que permite interactuar con la base de datos mediante llamadas a procedimientos almacenados. La actualización dinámica de datos se realiza a través de AJAX.
 
-## Concepto del Juego
-
-El juego se basa en la gestión de recursos y la toma de decisiones estratégicas para el desarrollo del asentamiento. Cada jugador inicia con una cantidad limitada de recursos y debe administrar su crecimiento mediante la construcción y mejora de infraestructuras.
-
-### Recursos Iniciales:
-- **Madera:** 500 unidades
-- **Ladrillo:** 500 unidades
-- **Oro:** 300 unidades
-
-## Edificios y Funciones
-
-### Campamentos
-Los campamentos son esenciales para la producción de recursos. Existen tres tipos:
-- **Campamento de Madera:** Genera madera.
-- **Campamento de Ladrillo:** Genera ladrillo.
-- **Campamento de Oro:** Genera oro.
-
-#### Mejora de Campamentos:
-- Requiere madera y ladrillo.
-- La cantidad de aldeanos asignados impacta directamente en la producción.
-- Ejemplo: Un campamento de oro a nivel 7 con 2 aldeanos asignados producirá 8 unidades de oro por segundo. Si sube a nivel 11 con 3 aldeanos, producirá 12 unidades por segundo.
-- Cada nivel tiene un costo específico en recursos para su actualización.
-
-### Casas
-- Aumentan la población máxima del asentamiento.
-- Cada casa permite hasta 5 aldeanos adicionales.
-- No pueden mejorarse, pero pueden construirse de manera ilimitada siempre que haya recursos suficientes.
-
-## Aldeanos
-
-### Reclutamiento
-- Los aldeanos se reclutan utilizando oro.
-- La cantidad total de aldeanos no puede exceder la población máxima determinada por las casas construidas.
-
-### Asignación
-- Los aldeanos pueden ser asignados a un único campamento.
-- Los campamentos producen más recursos cuando tienen más aldeanos asignados, respetando el nivel del edificio.
-- Los campamentos solo generan recursos si hay aldeanos asignados.
-- El oro se utiliza exclusivamente para reclutar aldeanos.
-
-## Almacenamiento de Datos
-
-El progreso del jugador, incluyendo el número de casas, aldeanos y niveles de los campamentos, será almacenado en una base de datos. Sin embargo, la estructura específica de la base de datos y la lógica para la actualización de edificios y contratación de aldeanos aún deben definirse mediante un análisis detallado.
+**Tecnologías y Herramientas Recomendadas:**  
+- **Base de Datos:** MySQL 8.0 (para ejecutar el script SQL)  
+  - Herramientas sugeridas: [HeidiSQL](https://www.heidisql.com/) o [phpMyAdmin](https://www.phpmyadmin.net/) (se incluye en la solución Docker)  
+- **Contenedores:** Docker y Docker Compose para simplificar el despliegue.  
+- **Lenguaje del Servidor:** PHP  
+- **Servidor Web:** Apache (incluido en el contenedor PHP)  
+- **Interfaz:** HTML, CSS y JavaScript (Bootstrap y FontAwesome)
 
 ---
 
-A continuación encontrarás un **script completo** en **MySQL** que:
+## 2. Diagrama Entidad-Relación (ER)
 
-1. Elimina (si existen) las tablas que se vayan a crear.  
-2. Crea todas las tablas necesarias (con tipos de dato equivalentes en MySQL).  
-3. Inserta datos de ejemplo (igual que en el código original).  
-4. Implementa un **procedimiento almacenado** para subir el nivel de un campamento de madera, descontando madera y ladrillo.  
+**Descripción:**  
+El diagrama ER final refleja la estructura y las relaciones entre las siguientes entidades:  
+- **USUARIO:** Datos de acceso del jugador.  
+- **PARTIDA:** Recursos, número de casas y vinculación con el usuario.  
+- **CASAS:** Representa las casas que aumentan la capacidad de población.  
+- **CAMPAMENTOS:** Edificios que generan recursos (tipos: Madera, Ladrillo, Oro).  
+- **ALDEANOS:** Trabajadores asignados a tareas, que pueden estar en estado "Descansando" o "Trabajando".  
+- **DATOS_CAMPAMENTOS:** Niveles de campamentos, costes de mejora y producción asociada.  
+- **LOG_ACCIONES:** Registro de acciones importantes del juego.
 
-> **Nota**:  
-> - En MySQL no existe `DBMS_OUTPUT.PUT_LINE`; se suele usar `SELECT 'texto';` o `SIGNAL`/`SET` para notificaciones, o simplemente no mostrar nada. He dejado algunos `SELECT` como mensajes de salida, a modo de ejemplo.  
-> - Se cambian los tipos `NUMBER` y `VARCHAR2` propios de Oracle por tipos equivalentes en MySQL (`INT`, `VARCHAR`).  
-> - La sintaxis `SELECT campo INTO variable` dentro de un procedimiento requiere `DELIMITER` y `DECLARE` en MySQL.
+*(Inserta aquí la imagen del diagrama ER corregido y ajustado a la versión final.)*
 
 ---
 
-### Cómo usar el procedimiento
-Una vez ejecutado el script anterior en tu instancia de MySQL, para subir el nivel del campamento de madera (en la partida con `Id_Partida=1`, por ejemplo), basta con llamar:
+## 3. Estructura de la Base de Datos
+
+### 3.1 Código de los CREATE TABLES
+
+El siguiente script SQL crea la base de datos y define las tablas necesarias para el sistema:
 
 ```sql
-CALL subir_nivel_campamento_madera(1);
+-- ==============================================
+-- ℭ𝔩𝔞𝔰𝔥 𝔒𝔣 𝔅𝔞𝔰𝔢𝔰
+-- ==============================================
+
+CREATE DATABASE IF NOT EXISTS mi_db_juego;
+USE mi_db_juego;
+
+DROP TABLE IF EXISTS LOG_ACCIONES;
+DROP TABLE IF EXISTS ALDEANOS;
+DROP TABLE IF EXISTS CAMPAMENTOS;
+DROP TABLE IF EXISTS CASAS;
+DROP TABLE IF EXISTS PARTIDA;
+DROP TABLE IF EXISTS USUARIO;
+DROP TABLE IF EXISTS DATOS_CAMPAMENTOS;
+DROP TABLE IF EXISTS PARAMETROS;
+
+-- Tabla PARAMETROS (costes globales y capacidad por casa)
+CREATE TABLE PARAMETROS (
+  Id_Parametros INT AUTO_INCREMENT PRIMARY KEY,
+  Coste_Aldeanos INT NOT NULL,
+  Coste_Casas INT NOT NULL,
+  Capacidad_Por_Casa INT NOT NULL,
+  Coste_Campamento INT NOT NULL
+) ENGINE=InnoDB;
+
+-- Tabla DATOS_CAMPAMENTOS (niveles, costes de mejora y producción)
+CREATE TABLE DATOS_CAMPAMENTOS (
+  Id_Datos_Campamentos INT AUTO_INCREMENT PRIMARY KEY,
+  Nivel INT NOT NULL CHECK (Nivel BETWEEN 1 AND 5),
+  Tipo VARCHAR(50) NOT NULL,
+  Coste_Madera_Mejora INT NOT NULL,
+  Coste_Ladrillo_Mejora INT NOT NULL,
+  Coste_Oro_Mejora INT NOT NULL DEFAULT 0,
+  Numero_Trabajadores_Al_100 INT NOT NULL,
+  Produccion INT NOT NULL
+) ENGINE=InnoDB;
+
+-- Tabla USUARIO (datos de acceso)
+CREATE TABLE USUARIO (
+  Id_Usuario INT AUTO_INCREMENT PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL,
+  Contraseña VARCHAR(100) NOT NULL
+) ENGINE=InnoDB;
+
+-- Tabla PARTIDA (recursos, casas y vinculación con el usuario)
+CREATE TABLE PARTIDA (
+  Id_Partida INT AUTO_INCREMENT PRIMARY KEY,
+  Madera INT NOT NULL,
+  Ladrillo INT NOT NULL,
+  Oro INT NOT NULL,
+  Numero_Casas INT NOT NULL,
+  Id_Usuario INT UNIQUE,
+  CONSTRAINT fk_partida_usuario FOREIGN KEY (Id_Usuario) REFERENCES USUARIO(Id_Usuario)
+) ENGINE=InnoDB;
+
+-- Tabla CASAS (cada casa aumenta la capacidad de población)
+CREATE TABLE CASAS (
+  Id_Casa INT AUTO_INCREMENT PRIMARY KEY,
+  Id_Partida INT NOT NULL,
+  CONSTRAINT fk_casas_partida FOREIGN KEY (Id_Partida) REFERENCES PARTIDA(Id_Partida)
+) ENGINE=InnoDB;
+
+-- Tabla CAMPAMENTOS (edificios generadores de recursos)
+CREATE TABLE CAMPAMENTOS (
+  Id_Campamentos INT AUTO_INCREMENT PRIMARY KEY,
+  Tipo VARCHAR(50) NOT NULL,  -- 'Madera', 'Ladrillo' o 'Oro'
+  Nivel INT NOT NULL,
+  N_Trabajadores INT NOT NULL,
+  Id_Partida INT NOT NULL,
+  CONSTRAINT fk_campamentos_partida FOREIGN KEY (Id_Partida) REFERENCES PARTIDA(Id_Partida)
+) ENGINE=InnoDB;
+
+-- Tabla ALDEANOS (trabajadores)
+CREATE TABLE ALDEANOS (
+  Id_Aldeanos INT AUTO_INCREMENT PRIMARY KEY,
+  Estado VARCHAR(50) NOT NULL, -- 'Descansando' o 'Trabajando'
+  Id_Partida INT NOT NULL,
+  Id_Casa INT,
+  Id_Campamentos INT,
+  CONSTRAINT fk_aldeanos_partida FOREIGN KEY (Id_Partida) REFERENCES PARTIDA(Id_Partida),
+  CONSTRAINT fk_aldeanos_casas FOREIGN KEY (Id_Casa) REFERENCES CASAS(Id_Casa),
+  CONSTRAINT fk_aldeanos_camp FOREIGN KEY (Id_Campamentos) REFERENCES CAMPAMENTOS(Id_Campamentos)
+) ENGINE=InnoDB;
+
+-- Tabla LOG_ACCIONES (registro de acciones)
+CREATE TABLE LOG_ACCIONES (
+  Id_Log INT AUTO_INCREMENT PRIMARY KEY,
+  Id_Partida INT NOT NULL,
+  TipoAccion VARCHAR(50) NOT NULL,
+  Descripcion TEXT NOT NULL,
+  Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_log_partida FOREIGN KEY (Id_Partida) REFERENCES PARTIDA(Id_Partida)
+) ENGINE=InnoDB;
+
+-- Índices para mejorar el rendimiento
+CREATE INDEX idx_partida_usuario ON PARTIDA(Id_Usuario);
+CREATE INDEX idx_casas_partida ON CASAS(Id_Partida);
+CREATE INDEX idx_campamentos_partida ON CAMPAMENTOS(Id_Partida);
+CREATE INDEX idx_aldeanos_partida ON ALDEANOS(Id_Partida);
+CREATE INDEX idx_aldeanos_casa ON ALDEANOS(Id_Casa);
+CREATE INDEX idx_aldeanos_camp ON ALDEANOS(Id_Campamentos);
+CREATE INDEX idx_log_partida ON LOG_ACCIONES(Id_Partida);
 ```
 
-El procedimiento:
-- Obtiene el nivel actual del campamento de tipo `'Madera'`.
-- Consulta en la tabla `DATOS_CAMPAMENTOS` los costes de mejora para ese nivel.
-- Verifica si la `PARTIDA` tiene suficiente `Madera` y `Ladrillo`.
-- Si es suficiente, sube el nivel (`UPDATE CAMPAMENTOS`) y descuenta los recursos (`UPDATE PARTIDA`).
-- Muestra un mensaje final con la cantidad de recursos restante o un aviso de que no hay recursos suficientes.
+### 3.2 Código de los INSERTS de Prueba
 
-¡Con esto tienes un ejemplo completo y funcional para **MySQL**!
+El siguiente script inserta datos de prueba para verificar el funcionamiento del sistema:
 
----
+```sql
+-- Insertar Usuarios
+INSERT INTO USUARIO (Nombre, Contraseña)
+VALUES ('Alvaro', 'pass123'),
+       ('Daniel', 'abc456');
 
-## Tecnologías Utilizadas
+-- Insertar Partidas
+INSERT INTO PARTIDA (Madera, Ladrillo, Oro, Numero_Casas, Id_Usuario)
+VALUES (500, 500, 300, 1, 1),  -- Partida de Alvaro
+       (800, 300, 100, 0, 2);  -- Partida de Daniel
 
-Para el desarrollo y despliegue de este proyecto, se sugiere utilizar:
+-- Insertar Parámetros Globales
+INSERT INTO PARAMETROS (Coste_Aldeanos, Coste_Casas, Capacidad_Por_Casa, Coste_Campamento)
+VALUES (50, 100, 5, 200);
 
-- **MySQL** (motor de bases de datos relacional).
-- **Docker** (contenedorización y despliegue rápido).
-- **Docker Compose** (orquestación de contenedores).
-- **phpMyAdmin** (herramienta web para la administración de MySQL).
-- **Visual Studio Code** (u otro editor/IDE que prefieras) con extensiones para SQL o Docker, si lo deseas.
-- **SQL** (lenguaje de consultas para la creación, manipulación y administración de la base de datos).
+-- Insertar Datos de Campamentos (niveles 1 a 5)
+INSERT INTO DATOS_CAMPAMENTOS 
+  (Nivel, Tipo, Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Coste_Oro_Mejora, Numero_Trabajadores_Al_100, Produccion)
+VALUES
+  (1, 'Madera',   10, 10,  0,  2, 10),
+  (2, 'Madera',   25, 20,  0,  5, 15),
+  (3, 'Madera',   45, 35,  0, 11, 20),
+  (4, 'Madera',   53, 41,  0, 16, 25),
+  (5, 'Madera',   60, 50,  0, 22, 30),
+  (1, 'Ladrillo', 10, 10,  0,  2, 10),
+  (2, 'Ladrillo', 25, 20,  0,  5, 15),
+  (3, 'Ladrillo', 45, 35,  0, 11, 20),
+  (4, 'Ladrillo', 53, 41,  0, 16, 25),
+  (5, 'Ladrillo', 60, 50,  0, 22, 30),
+  (1, 'Oro',      10, 10,  0,  2,  5),
+  (2, 'Oro',      50, 30,  0,  5,  7),
+  (3, 'Oro',      90, 70,  0, 11, 11),
+  (4, 'Oro',     106, 82,  0, 16, 15),
+  (5, 'Oro',     120,100,  0, 22, 19);
 
-Estas tecnologías facilitan el **despliegue** rápido y la **gestión** de la base de datos, permitiendo que el equipo se centre en la lógica de negocio del juego.
+-- Insertar una Casa (para Alvaro)
+INSERT INTO CASAS (Id_Partida)
+VALUES (1);
 
----
+-- Insertar Campamentos Iniciales
+INSERT INTO CAMPAMENTOS (Tipo, Nivel, N_Trabajadores, Id_Partida)
+VALUES ('Madera', 1, 2, 1),   -- Campamento de Madera para Alvaro
+       ('Oro', 1, 1, 2);      -- Campamento de Oro para Daniel
 
-## Cómo Desplegar el Entorno con Docker
-
-Para poner en marcha el proyecto de base de datos y poder cargar este script de forma sencilla, puedes usar **Docker** y **Docker Compose**:
-
-1. **Instala Docker** y **Docker Compose** (si aún no lo has hecho).
-
-2. Crea un archivo `docker-compose.yml` con el siguiente contenido (ejemplo):
-
-   ```yaml
-   version: '3.9'
-
-   services:
-     db:
-       image: mysql:8.0
-       container_name: mysql_db
-       environment:
-         - MYSQL_ROOT_PASSWORD=root
-         - MYSQL_DATABASE=mi_basedatos
-         - MYSQL_USER=usuario
-         - MYSQL_PASSWORD=password
-       ports:
-         - "3306:3306"
-       volumes:
-         - db_data:/var/lib/mysql
-       restart: unless-stopped
-
-     phpmyadmin:
-       image: phpmyadmin:latest
-       container_name: phpmyadmin
-       depends_on:
-         - db
-       environment:
-         - PMA_HOST=db
-         - PMA_PORT=3306
-         - PMA_USER=usuario
-         - PMA_PASSWORD=password
-         - UPLOAD_LIMIT=300M
-       ports:
-         - "8080:80"
-       restart: unless-stopped
-
-   volumes:
-     db_data:
-   ```
-
-   > Puedes personalizar las variables de entorno (contraseña, usuario, nombre de la base de datos, etc.) a tu gusto.
-
-3. **Levanta los contenedores** en segundo plano:
-   ```bash
-   docker-compose up -d
-   ```
-   Esto descargará las imágenes (MySQL y phpMyAdmin) y levantará los servicios.
-
-4. **Accede a phpMyAdmin** desde tu navegador en `http://localhost:8080`.  
-   - Host: `db`  
-   - Usuario y contraseña: los que has establecido en `docker-compose.yml` (por defecto `usuario / password`).
-
-5. Dentro de phpMyAdmin, selecciona la base de datos que creaste (por defecto `mi_basedatos`), ve a la pestaña **SQL** y **copia** el script completo (creación de tablas y procedimientos). Luego ejecútalo.
-
-   > Si prefieres, puedes utilizar cualquier **cliente MySQL** externo (DBeaver, MySQL Workbench, HeidiSQL, etc.) apuntando a `localhost:3306`.
-
-6. Para probar el **procedimiento almacenado**, una vez insertado el script, puedes abrir una ventana SQL en phpMyAdmin y ejecutar:
-   ```sql
-   CALL subir_nivel_campamento_madera(1);
-   ```
-   y verificar el mensaje de salida en la parte inferior o en la tabla `PARTIDA` y `CAMPAMENTOS` para observar los cambios.
+-- Insertar Aldeanos
+INSERT INTO ALDEANOS (Estado, Id_Partida, Id_Casa)
+VALUES ('Descansando', 1, 1);
+INSERT INTO ALDEANOS (Estado, Id_Partida, Id_Campamentos)
+VALUES ('Trabajando', 2, 2);
+```
 
 ---
 
-## Comandos Útiles en Docker y MySQL
+## 4. Lógica de Negocio en SQL
 
-1. **Ver logs** de un contenedor (p.ej. `mysql_db`):
-   ```bash
-   docker logs -f mysql_db
-   ```
+### 4.1 Procedures
 
-2. **Acceder por consola** a MySQL dentro del contenedor (útil si necesitas ejecutar consultas desde la línea de comandos):
-   ```bash
-   docker exec -it mysql_db bash
-   mysql -u usuario -p
-   ```
-   Después, ingresa la contraseña que definiste (`password` en el ejemplo).
+Se han creado procedimientos para implementar la lógica del juego. Algunos de ellos son:
 
-3. **Levantar y apagar contenedores**:
-   ```bash
-   # Levantar (en segundo plano)
-   docker-compose up -d
+- **log_accion:** Registra las acciones importantes en la tabla LOG_ACCIONES.
 
-   # Apagar
-   docker-compose down
-   ```
+- **subir_nivel_campamento:** (Procedimiento original que sube de nivel un campamento basándose en el tipo y partida).
 
-4. **Reiniciar** un servicio (por cambios en el `docker-compose.yml`):
-   ```bash
-   docker-compose restart db
-   ```
+- **subir_nivel_campamento_por_id:**  
+  Este procedimiento recibe el **ID específico del campamento** y la partida, permitiendo mejorar correctamente un campamento sin interferir con otros del mismo tipo.  
+  *(Ver sección de código a continuación)*
 
-5. **Listar contenedores** activos:
-   ```bash
-   docker ps
-   ```
+- **modificar_asignacion_trabajadores:** Actualiza la cantidad de trabajadores asignados a un campamento.
 
-6. **Detener contenedor** individualmente:
-   ```bash
-   docker stop mysql_db
-   ```
+- **actualizar_recursos_juego:** Recorre los campamentos y actualiza los recursos generados en la partida según la producción y los trabajadores asignados.
+
+- **reclutar_aldeano:** Permite reclutar un nuevo aldeano, descontando el recurso correspondiente.
+
+- **construir_casa:** Construye una nueva casa, descontando los recursos necesarios.
+
+- **asignar_aldeano_a_campamento:** Asigna (o reasigna) un aldeano a un campamento específico.
+
+- **crear_campamento:** Crea un nuevo campamento, descontando los recursos de construcción.
+
+**Código del procedimiento para subir nivel de un campamento por ID:**
+
+```sql
+DELIMITER $$
+CREATE PROCEDURE subir_nivel_campamento_por_id(IN p_IdCamp INT, IN p_IdPartida INT)
+subir: BEGIN
+    DECLARE v_Tipo VARCHAR(50);
+    DECLARE v_Nivel_Actual INT DEFAULT 0;
+    DECLARE v_NivelMax INT DEFAULT 0;
+    DECLARE v_Coste_Madera INT DEFAULT 0;
+    DECLARE v_Coste_Ladrillo INT DEFAULT 0;
+    DECLARE v_Coste_Oro INT DEFAULT 0;
+    DECLARE v_Recurso1 INT;
+    DECLARE v_Recurso2 INT;
+    DECLARE v_Recurso3 INT;
+    DECLARE v_Mensaje VARCHAR(255);
+
+    START TRANSACTION;
+    
+    -- Obtener el tipo y el nivel actual del campamento específico
+    SELECT Tipo, Nivel 
+      INTO v_Tipo, v_Nivel_Actual
+      FROM CAMPAMENTOS
+     WHERE Id_Campamentos = p_IdCamp
+     LIMIT 1;
+    
+    -- Obtener el nivel máximo para ese tipo de campamento
+    SELECT MAX(Nivel)
+      INTO v_NivelMax
+      FROM DATOS_CAMPAMENTOS
+     WHERE Tipo = v_Tipo;
+    
+    IF v_Nivel_Actual >= v_NivelMax THEN
+      SET v_Mensaje = CONCAT('El campamento de ', v_Tipo, ' ya está en el nivel máximo.');
+      ROLLBACK;
+      SELECT v_Mensaje AS Mensaje;
+      LEAVE subir;
+    END IF;
+    
+    -- Obtener los costes de mejora para el nivel actual del campamento
+    SELECT Coste_Madera_Mejora, Coste_Ladrillo_Mejora, Coste_Oro_Mejora
+      INTO v_Coste_Madera, v_Coste_Ladrillo, v_Coste_Oro
+      FROM DATOS_CAMPAMENTOS
+     WHERE Nivel = v_Nivel_Actual
+       AND Tipo = v_Tipo
+     LIMIT 1;
+    
+    IF v_Tipo = 'Oro' THEN
+      -- Mejorar campamento de Oro usando Oro
+      SELECT Oro INTO v_Recurso3
+        FROM PARTIDA
+       WHERE Id_Partida = p_IdPartida
+       LIMIT 1;
+      
+      IF v_Recurso3 >= v_Coste_Oro THEN
+         UPDATE CAMPAMENTOS
+           SET Nivel = Nivel + 1
+         WHERE Id_Campamentos = p_IdCamp;
+         
+         UPDATE PARTIDA
+           SET Oro = Oro - v_Coste_Oro
+         WHERE Id_Partida = p_IdPartida;
+         
+         SET v_Mensaje = CONCAT('Campamento de Oro subido de nivel. Oro restante: ', (v_Recurso3 - v_Coste_Oro));
+      ELSE
+         SET v_Mensaje = 'No hay suficientes recursos para mejorar el Campamento de Oro.';
+         ROLLBACK;
+         SELECT v_Mensaje AS Mensaje;
+         LEAVE subir;
+      END IF;
+    ELSE
+      -- Mejorar campamento de Madera o Ladrillo usando madera y ladrillo
+      SELECT Madera, Ladrillo
+        INTO v_Recurso1, v_Recurso2
+        FROM PARTIDA
+       WHERE Id_Partida = p_IdPartida
+       LIMIT 1;
+      
+      IF (v_Recurso1 >= v_Coste_Madera) AND (v_Recurso2 >= v_Coste_Ladrillo) THEN
+         UPDATE CAMPAMENTOS
+           SET Nivel = Nivel + 1
+         WHERE Id_Campamentos = p_IdCamp;
+         
+         UPDATE PARTIDA
+           SET Madera = Madera - v_Coste_Madera,
+               Ladrillo = Ladrillo - v_Coste_Ladrillo
+         WHERE Id_Partida = p_IdPartida;
+         
+         SET v_Mensaje = CONCAT('Campamento de ', v_Tipo, ' subido de nivel.');
+      ELSE
+         SET v_Mensaje = CONCAT('No hay suficientes recursos para mejorar el Campamento de ', v_Tipo, '.');
+         ROLLBACK;
+         SELECT v_Mensaje AS Mensaje;
+         LEAVE subir;
+      END IF;
+    END IF;
+    
+    CALL log_accion(p_IdPartida, 'mejorar', v_Mensaje);
+    COMMIT;
+    SELECT v_Mensaje AS Mensaje;
+END subir$$
+DELIMITER ;
+```
+
+### 4.2 Triggers
+
+Se ha creado el siguiente trigger para asegurar que los recursos no se vuelvan negativos:
+
+```sql
+DELIMITER $$
+CREATE TRIGGER trg_no_recursos_negativos
+BEFORE UPDATE ON PARTIDA
+FOR EACH ROW
+BEGIN
+    IF NEW.Madera < 0 THEN
+       SET NEW.Madera = 0;
+    END IF;
+    IF NEW.Ladrillo < 0 THEN
+       SET NEW.Ladrillo = 0;
+    END IF;
+    IF NEW.Oro < 0 THEN
+       SET NEW.Oro = 0;
+    END IF;
+END$$
+DELIMITER ;
+```
+
+### 4.3 EVENTOS (Opcional para sobresaliente)
+
+Para la actualización automática de recursos, se ha creado el siguiente EVENT que se ejecuta cada 1 minuto:
+
+```sql
+DELIMITER $$
+CREATE EVENT IF NOT EXISTS ev_update_recursos
+ON SCHEDULE EVERY 1 MINUTE
+ON COMPLETION PRESERVE
+DO
+BEGIN
+   CALL actualizar_recursos_juego();
+END$$
+DELIMITER ;
+```
 
 ---
+
+## 5. Aplicación PHP
+
+### 5.1 Descripción General
+
+La aplicación PHP se encarga de:  
+- Conectarse a la base de datos utilizando PDO.  
+- Permitir el inicio de sesión de usuarios.  
+- Mostrar un panel de control con información en tiempo real (recursos, infraestructuras, campamentos, aldeanos y ranking).  
+- Ejecutar procedimientos almacenados a través de formularios (por ejemplo, construir casa, reclutar aldeano, crear campamento, mejorar campamento, asignar/reasignar aldeanos).  
+- Actualizar de forma dinámica la información mediante AJAX.
+
+### 5.2 Código PHP y Estructura de la Interfaz
+
+La aplicación cuenta con un archivo `index.php` que integra:
+- Conexión a la base de datos y manejo de sesión.
+- Un modo AJAX para actualizar los datos de la partida cada 5 segundos.
+- Secciones para:  
+  - **Login:** Formulario de inicio de sesión.  
+  - **Dashboard:** Visualización de recursos e infraestructuras.  
+  - **Acciones Rápidas:** Formularios para construir casas, reclutar aldeanos y crear campamentos.  
+  - **Panel de Costos de Construcción:** Muestra los costes de creación de campamentos (se divide por tipo: Madera, Ladrillo y Oro).  
+  - **Campamentos:** Lista de campamentos creados con opción de mejora.  
+  - **Aldeanos:** Lista de aldeanos, con opción de ordenarlos por campamento o por disponibilidad, y un modal para reasignación.  
+  - **Ranking:** Ranking de partidas según puntaje.
+- Inclusión de Bootstrap y FontAwesome para el diseño y estilo.
+- Soporte para Docker, ya que el proyecto se despliega con un `docker-compose.yml` y archivos relacionados.
+
+*(Inserta aquí el código PHP completo o un resumen de sus partes más relevantes, resaltando las funcionalidades clave.)*
+
+---
+
+## 6. Despliegue del Proyecto
+
+### 6.1 Requisitos de Despliegue
+
+- **Docker y Docker Compose:**  
+  Se recomienda usar Docker para simplificar el despliegue. Se ha configurado un `docker-compose.yml` que define tres servicios:
+  - **db:** Contenedor con MySQL 8.0.
+  - **phpmyadmin:** Interfaz web para administrar la base de datos.
+  - **app:** Contenedor con Apache y PHP para ejecutar la aplicación.
+
+- **.env:**  
+  Se utiliza un archivo `.env` para definir variables de entorno como contraseñas, puertos y credenciales de la base de datos.
+
+### 6.2 Pasos para Desplegar el Proyecto
+
+1. **Clonar el Repositorio:**
+   - Clona el proyecto en tu máquina:
+     ```bash
+     git clone <URL_del_repositorio>
+     cd Trabajo-Bases-2025
+     ```
+
+2. **Configurar Variables de Entorno:**
+   - Asegúrate de tener el archivo `.env` en el directorio raíz, con las siguientes variables (puedes modificar los valores según tu entorno):
+     ```env
+     # --- MySQL ---
+     MYSQL_ROOT_PASSWORD=root
+     MYSQL_DATABASE=mi_db_juego
+     MYSQL_USER=usuario
+     MYSQL_PASSWORD=password
+     
+     # --- phpMyAdmin ---
+     PMA_HOST=db
+     PMA_PORT=3306
+     
+     # --- Aplicación PHP ---
+     DB_HOST=db
+     DB_NAME=mi_db_juego
+     DB_USER=usuario
+     DB_PASS=password
+     
+     # --- Puertos ---
+     HOST_PORT_HTTP=8080
+     HOST_PORT_APACHE=8000
+     ```
+     
+3. **Construir y Levantar los Contenedores:**
+   - Ejecuta el siguiente comando para iniciar todos los servicios:
+     ```bash
+     docker-compose up --build
+     ```
+   - Esto creará y levantará los contenedores para MySQL, phpMyAdmin y la aplicación PHP.
+     
+4. **Importar el Script SQL:**
+   - Puedes utilizar **HeidiSQL** o **phpMyAdmin** para importar el script SQL (por ejemplo, el archivo `Script-update.sql`) que contiene la creación de la base de datos, tablas, inserts, procedimientos, triggers y eventos.
+   - En phpMyAdmin, accede a `http://localhost:8080` (o la URL configurada) y usa la opción de "Importar" para subir el archivo.
+
+5. **Acceder a la Aplicación:**
+   - Abre en tu navegador `http://localhost:8000` para ver la interfaz del juego.
+   - Utiliza las funcionalidades disponibles (login, acciones, etc.) para probar el sistema.
+
+6. **Administrar la Base de Datos (Opcional):**
+   - Puedes acceder a phpMyAdmin en `http://localhost:8080` para administrar la base de datos de forma gráfica.
+
+---
+
+## 7. Conclusiones y Recomendaciones
+
+**Conclusiones:**  
+- Se ha desarrollado un sistema completo de gestión de recursos para un juego de simulación, integrando diseño de base de datos, lógica SQL (procedures, triggers y eventos) y una aplicación PHP interactiva.  
+- La implementación de actualizaciones en tiempo real mediante AJAX mejora la experiencia del usuario.
+
+**Recomendaciones:**  
+- Se recomienda utilizar Docker para un despliegue consistente y sencillo, aprovechando el archivo `docker-compose.yml` y las variables de entorno definidas en `.env`.  
+- Para la administración de la base de datos se sugiere usar herramientas como **HeidiSQL** o **phpMyAdmin**, según tu preferencia.
+- Se recomienda revisar y ajustar los procedimientos según los cambios en la lógica del juego o futuros requerimientos.
+- Como mejora opcional, se podría implementar un sistema de notificaciones en tiempo real (por ejemplo, usando WebSockets) para que los cambios se reflejen de inmediato sin tener que recargar la página o usar AJAX periódicamente.
+
